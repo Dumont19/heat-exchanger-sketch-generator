@@ -158,7 +158,7 @@ def browse_file():
     if file_path:
         file_path_entry.delete(0, "end")
         file_path_entry.insert(0, file_path)
-        populate_offsets(file_path)  # Carregar os offsets após o arquivo ser selecionado
+        populate_offsets(file_path)  
 
 def populate_offsets(file_path):
     try:
@@ -170,19 +170,19 @@ def populate_offsets(file_path):
         global offset_entries
         offset_entries = {}
 
-        # Adiciona labels para os campos de input
+        
         Label(offset_frame, text="Offset Vertical").grid(row=0, column=1, padx=5, pady=5)
         Label(offset_frame, text="Offset Horizontal Geral").grid(row=0, column=2, padx=5, pady=5)
-        Label(offset_frame, text="Offset Horizontal Entre Tubos (mm)").grid(row=0, column=3, padx=5, pady=5)
+        Label(offset_frame, text="Offset Horizontal Entre Tubos").grid(row=0, column=3, padx=5, pady=5)
         Label(offset_frame, text="Offset Tubo Inicial").grid(row=0, column=4, padx=5, pady=5)
 
         for i, (row, _) in enumerate(rows_data):
             row_number = int(row)
 
-            # Coloca o número da linha à esquerda de cada caixa de input
+            
             Label(offset_frame, text=f"Linha {row_number}").grid(row=i+1, column=0, padx=5, pady=5, sticky="e")
 
-            # Entradas para os valores de offset
+            
             offset_entries[row_number] = {
                 "offset_vertical": Entry(offset_frame, width=10),
                 "offset_horizontal_general": Entry(offset_frame, width=10),
@@ -190,7 +190,7 @@ def populate_offsets(file_path):
                 "start_position_offset_tube": Entry(offset_frame, width=10),
             }
 
-            # As entradas devem ser organizadas em colunas corretas
+            
             offset_entries[row_number]["offset_vertical"].grid(row=i+1, column=1, padx=2, pady=2)
             offset_entries[row_number]["offset_horizontal_general"].grid(row=i+1, column=2, padx=2, pady=2)
             offset_entries[row_number]["offset_horizontal"].grid(row=i+1, column=3, padx=2, pady=2)
@@ -200,7 +200,7 @@ def populate_offsets(file_path):
         messagebox.showerror("Erro", str(e))
 
 root = Tk()
-root.title("Heat Exchanger Visualizer")
+root.title("Gerador de croqui de trocadores de calor")
 
 Label(root, text="Arquivo Excel:").grid(row=0, column=0, padx=5, pady=5, sticky="e")
 file_path_entry = Entry(root, width=40)
