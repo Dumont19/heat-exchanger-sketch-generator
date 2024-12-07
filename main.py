@@ -3,6 +3,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tkinter import Tk, Label, Button, Entry, filedialog, messagebox, Frame
 
+def update_status(message, clear_before=False):
+    
+    if clear_before:
+        status_label.config(text="")
+        root.update_idletasks()
+    status_label.config(text=message)
+    root.update_idletasks()
+
+    
+    if message == "Arquivo carregado com sucesso.":
+        root.after(10000, lambda: status_label.config(text=""))
+
 def load_data_from_excel(file_path):
     try:
         df = pd.read_excel(file_path, sheet_name="IRIS-TABELA", header=6, engine="openpyxl")
@@ -101,6 +113,8 @@ def draw_heat_exchanger(rows_data, thickness_data, color_map, spacing_x, spacing
 
 def process_and_draw():
     try:
+        update_status("Gerando croqui...", clear_before=True)  
+
         file_path = file_path_entry.get()
         if not file_path:
             raise ValueError("Selecione um arquivo Excel válido.")
@@ -147,30 +161,40 @@ def process_and_draw():
             nominal_thickness=nominal_thickness,
             offsets=offsets,
         )
+
+        update_status("Croqui gerado com sucesso!")
     except Exception as e:
+        update_status("Erro ao gerar o croqui.", clear_before=True)
         messagebox.showerror("Erro", str(e))
 
 def browse_file():
-    file_path = filedialog.askopenfilename(
-        title="Selecione o arquivo Excel",
-        filetypes=[("Arquivos Excel", "*.xls *.xlsx *.xlsm *.xlsb")],
-    )
-    if file_path:
-        file_path_entry.delete(0, "end")
-        file_path_entry.insert(0, file_path)
-        populate_offsets(file_path)  
+    try:
+        update_status("Carregando arquivo...", clear_before=True)  
+
+        file_path = filedialog.askopenfilename(
+            title="Selecione o arquivo Excel",
+            filetypes=[("Arquivos Excel", "*.xls *.xlsx *.xlsm *.xlsb")],
+        )
+        if file_path:
+            file_path_entry.delete(0, "end")
+            file_path_entry.insert(0, file_path)
+            populate_offsets(file_path)
+
+        update_status("Arquivo carregado com sucesso!")
+    except Exception as e:
+        update_status("Erro ao carregar o arquivo.", clear_before=True)
+        messagebox.showerror("Erro", str(e))
 
 def populate_offsets(file_path):
     try:
         rows_data, _ = load_data_from_excel(file_path)
-        
+
         for widget in offset_frame.winfo_children():
             widget.destroy()
 
         global offset_entries
         offset_entries = {}
 
-        
         Label(offset_frame, text="Offset Vertical").grid(row=0, column=1, padx=5, pady=5)
         Label(offset_frame, text="Offset Horizontal Geral").grid(row=0, column=2, padx=5, pady=5)
         Label(offset_frame, text="Offset Horizontal Entre Tubos").grid(row=0, column=3, padx=5, pady=5)
@@ -179,10 +203,8 @@ def populate_offsets(file_path):
         for i, (row, _) in enumerate(rows_data):
             row_number = int(row)
 
-            
             Label(offset_frame, text=f"Linha {row_number}").grid(row=i+1, column=0, padx=5, pady=5, sticky="e")
 
-            
             offset_entries[row_number] = {
                 "offset_vertical": Entry(offset_frame, width=10),
                 "offset_horizontal_general": Entry(offset_frame, width=10),
@@ -190,7 +212,6 @@ def populate_offsets(file_path):
                 "start_position_offset_tube": Entry(offset_frame, width=10),
             }
 
-            
             offset_entries[row_number]["offset_vertical"].grid(row=i+1, column=1, padx=2, pady=2)
             offset_entries[row_number]["offset_horizontal_general"].grid(row=i+1, column=2, padx=2, pady=2)
             offset_entries[row_number]["offset_horizontal"].grid(row=i+1, column=3, padx=2, pady=2)
@@ -202,19 +223,22 @@ def populate_offsets(file_path):
 root = Tk()
 root.title("Gerador de croqui de trocadores de calor")
 
-Label(root, text="Arquivo Excel:").grid(row=0, column=0, padx=5, pady=5, sticky="e")
+Label(root, text="Arquivo Excel:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
 file_path_entry = Entry(root, width=40)
-file_path_entry.grid(row=0, column=1, padx=5, pady=5)
+file_path_entry.grid(row=0, column=1, pady=5, sticky="w")
 
 Button(root, text="Buscar Arquivo", command=browse_file).grid(row=0, column=2, padx=5, pady=5)
 
-Label(root, text="Espessura Nominal (mm):").grid(row=1, column=0, padx=5, pady=5, sticky="e")
+Label(root, text="Espessura Nominal (mm):").grid(row=1, column=0, padx=5, pady=5, sticky="w")
 nominal_thickness_entry = Entry(root, width=10)
-nominal_thickness_entry.grid(row=1, column=1, padx=5, pady=5)
+nominal_thickness_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
 Button(root, text="Gerar Croqui", command=process_and_draw).grid(row=2, column=0, columnspan=3, pady=10)
 
+status_label = Label(root, text="", fg="blue")
+status_label.grid(row=3, column=0, columnspan=3, pady=5)
+
 offset_frame = Frame(root)
-offset_frame.grid(row=3, column=0, columnspan=3, pady=10)
+offset_frame.grid(row=4, column=0, columnspan=3, pady=10)
 
 root.mainloop()
