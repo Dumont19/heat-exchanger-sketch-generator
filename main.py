@@ -13,7 +13,7 @@ def update_status(message, clear_before=False):
 
     
     if message == "Arquivo carregado com sucesso.":
-        root.after(10000, lambda: status_label.config(text=""))
+        root.after(5000, lambda: status_label.config(text=""))
 
 def load_data_from_excel(file_path):
     try:
@@ -180,7 +180,7 @@ def browse_file():
             file_path_entry.insert(0, file_path)
             populate_offsets(file_path)
 
-        update_status("Arquivo carregado com sucesso!")
+        update_status("Arquivo carregado com sucesso.")
     except Exception as e:
         update_status("Erro ao carregar o arquivo.", clear_before=True)
         messagebox.showerror("Erro", str(e))
